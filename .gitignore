@@ -205,3 +205,19 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+
+# Frontend Dependency & Build Directories
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+
+# Local Sniffer Runtime Logs
+backend/live_flows.csv
+
+# Exclude Heavy Machine Learning Models (500MB Binary Files)
+backend/models/*.pkl
+
+# System Environment Cache
+.DS_Store
+Thumbs.db
