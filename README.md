@@ -89,8 +89,8 @@ This project was developed as part of the **HPE CPP-3 Program**. Gratitude to th
 
 | Name        | GitHub Profile                                            |
 | ------------| --------------------------------------------------------- |
-| Divesh Jain | [Diveshjain]https://github.com/Diveshjain005              |
+| Divesh Jain | [Diveshjain](https://github.com/Diveshjain005)              |
 | Hemangini   | [HemanginiPadia](https://github.com/HemanginiPadia)       |
-| Lakshya     | [lakshyagupta1335]https://github.com/lakshyagupta1335     |
+| Lakshya     | [lakshyagupta1335](https://github.com/lakshyagupta1335)     |
 | Neelkanth   | [neelkanth-tiwadi](https://github.com/neelkanth-tiwadi)   |
 | Vansh       | [VanshSwaroopVerma](https://github.com/VanshSwaroopVerma) |
