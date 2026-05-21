@@ -116,7 +116,7 @@ The backend engine continuously watches the local data log for newly appended li
 ### Live Dashboard Updates
 Once classification finishes, the backend packages the flow data and prediction labels into a lightweight JSON object. Flask-SocketIO pushes this payload over the open WebSocket connection instantly. The React frontend reads the incoming stream, dynamically updates individual component states, and increments the status counters on the UI without requiring a page refresh.
 
-![System Flow Diagram](assets/Flow%20Diagram.jpg)
+![System Flow Diagram](assets/Flow%20Diagram.png)
 
 ## Tech Stack
 
