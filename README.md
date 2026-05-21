@@ -79,10 +79,10 @@ Multiple supervised and unsupervised machine learning models were trained on the
 
 Supervised models were used for labeled traffic classification, while unsupervised models were used to detect unknown or anomalous behavior.
 
-![Supervised Model Performance Comparison](assets/Supervised_performance.png)
+![Supervised Model Performance Comparison](assets/Supervised_performance.jpeg)
 - After evaluation, Random Forest was selected for classification due to its performance and robust behavior across network classes.
 
-![Unsupervised Model Performance Comparison](assets/Unsupervised_performance.jpeg)
+![Unsupervised Model Performance Comparison](assets/Unsupervised_performance.png)
 - Isolation Forest was selected for anomaly detection due to its fast and effective detection in high-volume, unknown traffic scenarios.
 
 ## Rule-Based Heuristic System
