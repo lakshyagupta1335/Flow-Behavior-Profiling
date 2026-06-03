@@ -1,5 +1,6 @@
 import os
 import sys
+import gevent
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import time
@@ -14,6 +15,9 @@ import random
 from synthetic_flow import get_synthetic_flows
 from classifier import RealTimeClassifier
 from sniffer_service import run_live_sniffer
+
+# Import the dynamic platform runtime service wrapper
+from services import runtime_sniffer
 
 synthetic_pool = get_synthetic_flows()
 
@@ -33,7 +37,7 @@ file_lock = threading.Lock()
 app = Flask(__name__)
 CORS(app)
 
-socketio = SocketIO(app, cors_allowed_origins="*", transports=['websocket'])
+socketio = SocketIO(app, cors_allowed_origins="*", transports=['websocket'], async_mode='gevent')
 
 # function for synthetic traffic
 def inject_synthetic(batch):
@@ -111,6 +115,7 @@ def file_watcher():
                 if is_capturing:
                     batch = inject_synthetic(batch)
                 socketio.emit('new_flow_batch', batch)
+                gevent.sleep(0)
         
         time.sleep(0.5)
 
@@ -122,9 +127,8 @@ def handle_start_capture(data):
     is_capturing = False 
     
     with file_lock: 
-        if sniffer_process and sniffer_process.is_alive():
-            sniffer_process.terminate()
-            sniffer_process.join(timeout=2)
+        # Leverage the dynamic runtime sniffer to terminate any running process
+        runtime_sniffer.stop_live_capture()
         
         for _ in range(5): 
             try:
@@ -137,9 +141,8 @@ def handle_start_capture(data):
             except PermissionError:
                 time.sleep(0.5)
 
-    # Start Sniffer
-    sniffer_process = Process(target=run_live_sniffer, args=(interface, LIVE_FILE))
-    sniffer_process.start()
+    # Start Sniffer via the cross-platform platform driver layer
+    runtime_sniffer.start_live_capture(interface, LIVE_FILE)
     
     time.sleep(3) 
     is_capturing = True
@@ -148,23 +151,24 @@ def handle_start_capture(data):
 @socketio.on('get_interfaces')
 def handle_get_interfaces():
     try:
-        addrs = psutil.net_if_addrs()
-        interfaces = list(addrs.keys())
+        # Dynamically targets platform native interfaces (Win32 API vs POSIX Net_Ifs)
+        interfaces = runtime_sniffer.get_system_interfaces()
         socketio.emit('interfaces_list', interfaces)
     except Exception as e:
         print(f"[ERROR] Could not fetch interfaces: {e}")
 
 @socketio.on('stop_capture')
 def handle_stop_capture():
-    global sniffer_process, is_capturing
+    global is_capturing
     is_capturing = False
     last_pos = 0 
-    if sniffer_process and sniffer_process.is_alive():
-        sniffer_process.terminate()
-        sniffer_process.join(timeout=1)
+    
+    # Gracefully stops capture process trees depending on underlying OS capabilities
+    runtime_sniffer.stop_live_capture()
     socketio.emit('status_update', "Capture Stopped. Ready.")
 
 
 if __name__ == "__main__":
+    # Keep using standard Python OS threads natively!
     threading.Thread(target=file_watcher, daemon=True).start()
     socketio.run(app, host="0.0.0.0", port=5000, debug=False, use_reloader=False)
