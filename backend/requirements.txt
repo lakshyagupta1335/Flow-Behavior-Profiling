@@ -1,5 +1,15 @@
 flask==3.0.3
 flask-cors==4.0.1
+flask-socketio==5.3.6
 pandas==2.2.2
 numpy==1.26.4
 scikit-learn==1.5.1
+joblib==1.4.2
+psutil==5.9.8
+
+# Asynchronous WebSocket Server Tier (Active on Linux, falls back smoothly on Windows)
+gevent==24.2.1
+gevent-websocket==0.10.1
+
+# Custom Network Packet Flow Engine (Installed directly from our GitHub repository)
+git+https://github.com/lakshyagupta1335/cicflowmeter-hpe.git@master
