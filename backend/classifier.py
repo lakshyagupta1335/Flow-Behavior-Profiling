@@ -14,32 +14,87 @@ class RealTimeClassifier:
 
     def normalize_keys(self, flow_dict):
         mapping = {
-            "avg_packet_size": "Pkt Size Avg",
-            "fwd_packets_s": "Fwd Pkts S",
-            "bwd_packet_length_std": "Bwd Packet Length Std",
-            "flow_iat_max": "Flow Iat Max",
-            "flow_iat_min": "Flow Iat Min",
-            "flow_iat_mean": "Flow Iat Mean",
-
-            "ack_flag_count": "Ack Flag Cnt",
-            "syn_flag_count": "Syn Flag Cnt",
-            "rst_flag_count": "Rst Flag Cnt",
-
+            "src_port": "Src Port",
             "dst_port": "Dst Port",
-
-            "flow_byts_s": "Flow Byts S",
-            "flow_pkts_s": "Flow Pkts S",
-
-            "pkt_len_max": "Pkt Len Max",
-            "pkt_len_min": "Pkt Len Min",
-            "pkt_len_mean": "Pkt Len Mean",
-            "pkt_len_std": "Pkt Len Std",
-            "pkt_len_var": "Pkt Len Var",
+            "protocol": "Protocol",
+            "flow_duration": "Flow Duration",
+            "tot_fwd_pkts": "Total Fwd Packets",
+            "tot_bwd_pkts": "Total Backward Packets",
+            "totlen_fwd_pkts": "Total Length of Fwd Packets",
+            "totlen_bwd_pkts": "Total Length of Bwd Packets",
+            "fwd_pkt_len_max": "Fwd Packet Length Max",
+            "fwd_pkt_len_min": "Fwd Packet Length Min",
+            "fwd_pkt_len_mean": "Fwd Packet Length Mean",
+            "fwd_pkt_len_std": "Fwd Packet Length Std",
+            "bwd_pkt_len_max": "Bwd Packet Length Max",
+            "bwd_pkt_len_min": "Bwd Packet Length Min",
+            "bwd_pkt_len_mean": "Bwd Packet Length Mean",
+            "bwd_pkt_len_std": "Bwd Packet Length Std",
+            "flow_byts_s": "Flow Bytes/s",
+            "flow_pkts_s": "Flow Packets/s",
+            "flow_iat_mean": "Flow IAT Mean",
+            "flow_iat_std": "Flow IAT Std",
+            "flow_iat_max": "Flow IAT Max",
+            "flow_iat_min": "Flow IAT Min",
+            "fwd_iat_tot": "Fwd IAT Total",
+            "fwd_iat_mean": "Fwd IAT Mean",
+            "fwd_iat_std": "Fwd IAT Std",
+            "fwd_iat_max": "Fwd IAT Max",
+            "fwd_iat_min": "Fwd IAT Min",
+            "bwd_iat_tot": "Bwd IAT Total",
+            "bwd_iat_mean": "Bwd IAT Mean",
+            "bwd_iat_std": "Bwd IAT Std",
+            "bwd_iat_max": "Bwd IAT Max",
+            "bwd_iat_min": "Bwd IAT Min",
+            "fwd_psh_flags": "Fwd PSH Flags",
+            "bwd_psh_flags": "Bwd PSH Flags",
+            "fwd_urg_flags": "Fwd URG Flags",
+            "bwd_urg_flags": "Bwd URG Flags",
+            "fwd_header_len": "Fwd Header Length",
+            "bwd_header_len": "Bwd Header Length",
+            "fwd_pkts_s": "Fwd Packets/s",
+            "bwd_pkts_s": "Bwd Packets/s",
+            "pkt_len_min": "Min Packet Length",
+            "pkt_len_max": "Max Packet Length",
+            "pkt_len_mean": "Packet Length Mean",
+            "pkt_len_std": "Packet Length Std",
+            "pkt_len_var": "Packet Length Variance",
+            "fin_flag_cnt": "FIN Flag Count",
+            "syn_flag_cnt": "SYN Flag Count",
+            "rst_flag_cnt": "RST Flag Count",
+            "psh_flag_cnt": "PSH Flag Count",
+            "ack_flag_cnt": "ACK Flag Count",
+            "urg_flag_cnt": "URG Flag Count",
+            "cwr_flag_count": "CWR Flag Count",
+            "ece_flag_cnt": "ECE Flag Count",
+            "down_up_ratio": "Down/Up Ratio",
+            "pkt_size_avg": "Average Packet Size",
+            "fwd_seg_size_avg": "Avg Fwd Segment Size",
+            "bwd_seg_size_avg": "Avg Bwd Segment Size",
+            "fwd_byts_b_avg": "Fwd Avg Bytes/Bulk",
+            "fwd_pkts_b_avg": "Fwd Avg Packets/Bulk",
+            "fwd_blk_rate_avg": "Fwd Avg Bulk Rate",
+            "bwd_byts_b_avg": "Bwd Avg Bytes/Bulk",
+            "bwd_pkts_b_avg": "Bwd Avg Packets/Bulk",
+            "bwd_blk_rate_avg": "Bwd Avg Bulk Rate",
+            "subflow_fwd_pkts": "Subflow Fwd Packets",
+            "subflow_fwd_byts": "Subflow Fwd Bytes",
+            "subflow_bwd_pkts": "Subflow Bwd Packets",
+            "subflow_bwd_byts": "Subflow Bwd Bytes",
+            "init_fwd_win_byts": "Init_Win_bytes_forward",
+            "init_bwd_win_byts": "Init_Win_bytes_backward",
+            "fwd_act_data_pkts": "act_data_pkt_fwd",
+            "fwd_seg_size_min": "min_seg_size_forward",
+            "active_mean": "Active Mean",
+            "active_std": "Active Std",
+            "active_max": "Active Max",
+            "active_min": "Active Min",
+            "idle_mean": "Idle Mean",
+            "idle_std": "Idle Std",
+            "idle_max": "Idle Max",
+            "idle_min": "Idle Min"
         }
-
-        return {
-            mapping.get(k, k): v for k, v in flow_dict.items()
-        }
+        return {mapping.get(k, k): v for k, v in flow_dict.items()}
 
     def __init__(self):
         self.rf_model = None
@@ -47,11 +102,14 @@ class RealTimeClassifier:
         self.le = LabelEncoder()
         self.is_trained = False
         self.SUSPICIOUS_LABELS = ["Portscan", "Infiltration", "Infiltration - Attempted", "Infiltration - Portscan"]
+        self.MISCONFIGURED_LABELS = ["Dead Service", "TCP Handshake Anomaly", "Keep Alive Timeout", "Packet Size Anomaly"]
+        
         self.cols_to_drop = ["Label", "Flow ID", "id", "Src IP", "Dst IP", "Timestamp", "Attempted Category", "Src Port"]
 
     def threat_category(self, label: str) -> str:
         if label == "BENIGN": return "Normal"
         elif label == "Anomaly": return "Anomaly"
+        elif label in self.MISCONFIGURED_LABELS: return "Misconfigured"
         elif label in self.SUSPICIOUS_LABELS or "Attempted" in label: return "Suspicious"
         else: return "Attack-like"
 
@@ -70,18 +128,33 @@ class RealTimeClassifier:
             return False
 
     def rule_based_check(self, data):
-
         try:
-            dest_port = int(data.get('dst_port', 0))
-            avg_packet_size = float(data.get('avg_packet_size', 0))
-            fwd_packet_rate = float(data.get('fwd_packets_s', 0))
-            ack_flag_count = int(data.get('ack_flag_count', 0))
-            packet_variance = float(data.get('bwd_packet_length_std', 0))
-            max_idle_time = float(data.get('flow_iat_max', 0))
-            syn_flag_count = int(data.get('syn_flag_count', 0))
-            rst_flag_count = int(data.get('rst_flag_count', 0))
-
             
+            dest_port       = int(data.get('dst_port', 0))
+            avg_packet_size = float(data.get('pkt_size_avg', 0))      
+            fwd_packet_rate = float(data.get('fwd_pkts_s', 0))        
+            ack_flag_count  = int(data.get('ack_flag_cnt', 0))
+            packet_variance = float(data.get('bwd_pkt_len_std', 0))    
+            max_idle_time   = float(data.get('flow_iat_max', 0))
+            syn_flag_count  = int(data.get('syn_flag_cnt', 0))
+            rst_flag_count  = int(data.get('rst_flag_cnt', 0))
+
+            flow_pkts_s = float(data.get('flow_pkts_s', 0))
+            pkt_len_max = float(data.get('pkt_len_max', 0))
+            pkt_len_std = float(data.get('pkt_len_std', 0))
+
+            if rst_flag_count >= 2 and flow_pkts_s < 10:
+                return 'Dead Service'
+
+            if syn_flag_count >= 3 and ack_flag_count == 0:
+                if dest_port not in [80, 443, 21, 22]:
+                    return 'TCP Handshake Anomaly'
+
+            if max_idle_time > 60000000 and flow_pkts_s < 2:
+                return 'Keep Alive Timeout'
+
+            if pkt_len_max > 2500 and pkt_len_std > 1000:
+                return 'Packet Size Anomaly'
 
             if ack_flag_count > 4000:
                 return 'Heartbleed'
@@ -168,8 +241,6 @@ class RealTimeClassifier:
 
             return 'BENIGN'
 
-            
-
         except:
             return "BENIGN"
  
@@ -216,36 +287,42 @@ class RealTimeClassifier:
         )
 
         self.iso_forest.fit(X_benign_only)
-
         self.is_trained = True
         
 
-    def predict_live(self, flow_dict):
+    def predict_live(self, flow_dict, use_anomaly=True):
         if not self.is_trained: return "Unclassified", "Waiting"
         try:
-            # Rule Based Check
-            label = self.rule_based_check(flow_dict)
+            normalized_rule_data = {
+                k.lower().replace(" ", "_"): v
+                for k, v in flow_dict.items()
+            }
+
+            label = self.rule_based_check(normalized_rule_data)
             if label != 'BENIGN':
                 return label, self.threat_category(label)
 
-            # ML Model
             expected_features = self.rf_model.feature_names_in_
-
-            flow_dict = self.normalize_keys(flow_dict)
-            feature_map = {col.replace('_', ' ').title().strip(): val for col, val in flow_dict.items()}
+            feature_map = self.normalize_keys(flow_dict)
             
-            X_input = [float(feature_map.get(feat, 0)) for feat in expected_features]
-            X_input = np.array(X_input).reshape(1, -1)
+            X_input = [float(feature_map.get(feat, 0) or 0) for feat in expected_features]
+            X_input = np.array(X_input, dtype=np.float32)
+            X_input[np.isinf(X_input)] = 0
+            X_input[np.isnan(X_input)] = 0
+            X_input = np.clip(X_input, -1e9, 1e9)
+            X_input = X_input.reshape(1, -1)
 
             rf_pred_encoded = self.rf_model.predict(X_input)
             label = self.le.inverse_transform(rf_pred_encoded)[0]
 
-            if label == "BENIGN":
+            if use_anomaly and label == "BENIGN":
                 iso_pred = self.iso_forest.predict(X_input)[0]
+
                 if iso_pred == -1:
                     return "Anomaly", self.threat_category("Anomaly")
 
             return label, self.threat_category(label)
         
         except Exception as e:
+            print(f"[ENGINE ERROR] Prediction failed cleanly: {e}")
             return "ML_Error", "Normal"
